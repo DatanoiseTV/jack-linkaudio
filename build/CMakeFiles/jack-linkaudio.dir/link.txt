@@ -1,0 +1,1 @@
+/usr/bin/c++  -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names -L/opt/homebrew/Cellar/jack/1.9.22_1/lib -ljack "CMakeFiles/jack-linkaudio.dir/src/main.cpp.o" "CMakeFiles/jack-linkaudio.dir/src/Bridge.cpp.o" -o jack-linkaudio  extern/link/libabl_link.a

@@ -1,0 +1,12 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/syso/dev/jack-linkaudio/build/cmake_install.cmake",
+		"/Users/syso/dev/jack-linkaudio/build/extern/link/cmake_install.cmake",
+		"/Users/syso/dev/jack-linkaudio/build/extern/link/include/cmake_install.cmake",
+		"/Users/syso/dev/jack-linkaudio/build/extern/link/src/cmake_install.cmake",
+		"/Users/syso/dev/jack-linkaudio/build/extern/link/examples/cmake_install.cmake",
+		"/Users/syso/dev/jack-linkaudio/build/extern/link/extensions/abl_link/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
