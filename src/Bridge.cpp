@@ -214,8 +214,8 @@ void Bridge::SourceHandler::process(size_t nframes, typename Link::SessionState 
 
 // --- Bridge ---
 
-Bridge::Bridge(const std::string& name, int numInputs)
-    : mName(name), mLink(120.0, name) {
+Bridge::Bridge(const std::string& name, int numInputs, bool sync)
+    : mName(name), mLink(120.0, name), mSyncEnabled(sync) {
     
     jack_status_t status;
     mJackClient = jack_client_open(name.c_str(), JackNoStartServer, &status);
@@ -229,6 +229,10 @@ Bridge::Bridge(const std::string& name, int numInputs)
     jack_set_latency_callback(mJackClient, jackLatencyCallback, this);
     jack_on_shutdown(mJackClient, jackShutdownCallback, this);
 
+    if (mSyncEnabled) {
+        jack_set_timebase_callback(mJackClient, true, jackTimebaseCallback, this);
+    }
+
     for (int i = 0; i < numInputs; ++i) {
         std::string portName = "in_" + std::to_string(i + 1);
         mSinks.push_back(std::make_unique<SinkHandler>(mLink, portName, mJackClient));
@@ -240,6 +244,9 @@ Bridge::Bridge(const std::string& name, int numInputs)
 }
 
 Bridge::~Bridge() {
+    if (mSyncEnabled && mJackClient) {
+        jack_set_timebase_callback(mJackClient, false, nullptr, nullptr);
+    }
     stop();
     if (mJackClient) {
         jack_client_close(mJackClient);
@@ -317,6 +324,38 @@ void Bridge::updateLatencies() {
 
 void Bridge::jackShutdownCallback(void* arg) {
     static_cast<Bridge*>(arg)->mRunning = false;
+}
+
+void Bridge::jackTimebaseCallback(jack_transport_state_t state, jack_nframes_t nframes, jack_position_t* pos, int new_pos, void* arg) {
+    static_cast<Bridge*>(arg)->timebaseCallback(state, nframes, pos, new_pos);
+}
+
+void Bridge::timebaseCallback(jack_transport_state_t state, jack_nframes_t nframes, jack_position_t* pos, int new_pos) {
+    auto sessionState = mLink.captureAudioSessionState();
+    const auto time = mLink.clock().micros();
+    const double quantum = 4.0;
+    const double beat = sessionState.beatAtTime(time, quantum);
+
+    pos->valid = JackPositionBBT;
+    pos->beats_per_bar = static_cast<float>(quantum);
+    pos->beat_type = 4;
+    pos->ticks_per_beat = 1920;
+    pos->beats_per_minute = sessionState.tempo();
+    
+    pos->bar = static_cast<int32_t>(beat / quantum) + 1;
+    pos->beat = static_cast<int32_t>(fmod(beat, quantum)) + 1;
+    pos->tick = static_cast<int32_t>(fmod(beat, 1.0) * pos->ticks_per_beat);
+    
+    if (sessionState.isPlaying()) {
+        if (state == JackTransportStopped) {
+            jack_transport_start(mJackClient);
+        }
+        jack_transport_reposition(mJackClient, pos);
+    } else {
+        if (state == JackTransportRolling) {
+            jack_transport_stop(mJackClient);
+        }
+    }
 }
 
 void Bridge::onChannelsChanged() {

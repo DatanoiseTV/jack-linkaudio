@@ -16,7 +16,7 @@ namespace linkaudio {
 
 class Bridge {
 public:
-    Bridge(const std::string& name, int numInputs);
+    Bridge(const std::string& name, int numInputs, bool sync);
     ~Bridge();
 
     void start();
@@ -71,6 +71,9 @@ private:
     void updateLatencies();
 
     static void jackShutdownCallback(void* arg);
+    
+    static void jackTimebaseCallback(jack_transport_state_t state, jack_nframes_t nframes, jack_position_t* pos, int new_pos, void* arg);
+    void timebaseCallback(jack_transport_state_t state, jack_nframes_t nframes, jack_position_t* pos, int new_pos);
 
     void onChannelsChanged();
 
@@ -85,6 +88,7 @@ private:
     
     double mSampleRate = 44100.0;
     double mSampleTime = 0.0;
+    bool mSyncEnabled;
     std::atomic<bool> mRunning{false};
     
     // Latencies in microseconds

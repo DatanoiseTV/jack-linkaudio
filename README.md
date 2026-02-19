@@ -42,13 +42,14 @@ The executable will be located at `build/jack-linkaudio`.
 Run the bridge from your terminal:
 
 ```bash
-./build/jack-linkaudio [client-name] [num-inputs]
+./build/jack-linkaudio [client-name] [num-inputs] [--sync]
 ```
 
 ### Arguments
 
 - `client-name` (optional): The name that the client will use to register with JACK. Defaults to `jack-linkaudio`.
 - `num-inputs` (optional): The number of JACK input ports to create. Each input port will create a corresponding Link Audio stream. Defaults to 2.
+- `--sync` (optional): When provided, `jack-linkaudio` will act as a JACK timebase master, sending tempo and transport information from the Link session to JACK.
 
 Once running, `jack-linkaudio` will create the specified number of input ports (e.g., `jack-linkaudio:in_1`). Any audio sent to these ports will be broadcast as a Link Audio stream.
 

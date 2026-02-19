@@ -15,22 +15,30 @@ void signalHandler(int signal) {
 int main(int argc, char** argv) {
     std::string name = "jack-linkaudio";
     int numInputs = 2;
+    bool sync = false;
 
-    if (argc > 1) {
-        name = argv[1];
-    }
-    if (argc > 2) {
-        numInputs = std::stoi(argv[2]);
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+        if (arg == "--sync") {
+            sync = true;
+        } else if (i == 1) {
+            name = arg;
+        } else if (i == 2) {
+            numInputs = std::stoi(arg);
+        }
     }
 
     std::signal(SIGINT, signalHandler);
     std::signal(SIGTERM, signalHandler);
 
     try {
-        ableton::linkaudio::Bridge bridge(name, numInputs);
+        ableton::linkaudio::Bridge bridge(name, numInputs, sync);
         bridge.start();
 
         std::cout << "Started bridge '" << name << "' with " << numInputs << " inputs." << std::endl;
+        if (sync) {
+            std::cout << "JACK transport sync is enabled." << std::endl;
+        }
         std::cout << "Press Ctrl+C to stop." << std::endl;
 
         while (!gQuit && bridge.isRunning()) {
