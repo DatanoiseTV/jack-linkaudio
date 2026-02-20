@@ -5,9 +5,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Ableton Link
-set(LINK_BUILD_JACK ON CACHE BOOL "Build Link examples with JACK support" FORCE)
-set(LINK_BUILD_TESTS OFF CACHE BOOL "Disable building Link tests" FORCE)
-add_subdirectory(extern/link)
+include(extern/link/AbletonLinkConfig.cmake)
+add_subdirectory(extern/link/extensions/abl_link)
 
 # JACK
 find_package(PkgConfig REQUIRED)
