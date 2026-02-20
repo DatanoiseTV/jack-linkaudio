@@ -13,7 +13,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, macos-14] # macos-latest is x64, macos-14 is arm64
+        os: [ubuntu-latest, macos-latest, macos-14, windows-latest] # Add windows-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -60,20 +60,41 @@ jobs:
         echo "Debug: pkg-config --libs portaudio-2.0"
         pkg-config --libs portaudio-2.0 || true # Debug output, allow failure
 
+    - name: Set up dependencies (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        # Installing JACK on Windows is complex. For CI, we can try to install a pre-built SDK or MSYS2/MinGW-w64 with JACK.
+        # This is a placeholder and might require further refinement.
+        # Example: Using Chocolatey to install MinGW and then manually downloading JACK SDK
+        choco install mingw --version 13.1.0 # Or specific version that includes pkg-config
+        refreshenv
+        # Need to manually download JACK SDK and set environment variables for CMake
+        # For simplicity in CI, we might need a custom build environment with JACK pre-installed.
+        # For now, we will let it fail and address this separately if desired.
+        echo "Skipping JACK installation for Windows CI for now due to complexity."
+
+
     - name: Configure CMake
       run: |
-        cmake -B ${{runner.temp}}/build -DCMAKE_BUILD_TYPE=Release
+        cmake -B ${{runner.temp}}/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ env.CMAKE_PREFIX_PATH }}"
 
     - name: Build
       run: cmake --build ${{runner.temp}}/build --config Release -- -j$(nproc)
+
+    - name: Debug build directory content before upload
+      run: |
+        ls -R ${{runner.temp}}/build
+        ls -R ${{runner.temp}}/build/jack-linkaudio || true # Check if it's a directory, might be a file
 
     - name: Determine Architecture for artifact naming
       id: get_arch
       run: |
         if [[ "${{ matrix.os }}" == "macos-14" ]]; then
           echo "ARCH=arm64" >> $GITHUB_OUTPUT
+        elif [[ "${{ runner.os }}" == "Windows" ]]; then
+          echo "ARCH=x64" >> $GITHUB_OUTPUT # Windows runners are typically x64
         else
-          echo "ARCH=x64" >> $GITHUB_OUTPUT # Default for Linux and macos-latest
+          echo "ARCH=x64" >> $GITHUB_OUTPUT # Default for Linux and macos-latest (x64)
         fi
 
     - name: Upload artifact
@@ -102,3 +123,4 @@ jobs:
           jack-linkaudio-Ubuntu-x64/jack-linkaudio
           jack-linkaudio-macOS-x64/jack-linkaudio
           jack-linkaudio-macOS-arm64/jack-linkaudio
+          jack-linkaudio-Windows-x64/jack-linkaudio
