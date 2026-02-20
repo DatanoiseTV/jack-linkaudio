@@ -24,6 +24,12 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y libjack-jackd2-dev
+        # Ensure PKG_CONFIG_PATH is set even for apt to help pkg-config find it consistently
+        echo "PKG_CONFIG_PATH=$(pkg-config --variable pc_path pkg-config)" >> $GITHUB_ENV
+        echo "Debug: pkg-config --cflags jack"
+        pkg-config --cflags jack || true # Debug output, allow failure
+        echo "Debug: pkg-config --libs jack"
+        pkg-config --libs jack || true # Debug output, allow failure
 
     - name: Set up dependencies (macOS)
       if: runner.os == 'macOS'
@@ -31,10 +37,15 @@ jobs:
         brew update
         brew install jack
         echo "PKG_CONFIG_PATH=$(brew --prefix)/lib/pkgconfig" >> $GITHUB_ENV
+        echo "CMAKE_PREFIX_PATH=$(brew --prefix)" >> $GITHUB_ENV # Set CMAKE_PREFIX_PATH in env
+        echo "Debug: pkg-config --cflags jack"
+        pkg-config --cflags jack || true # Debug output, allow failure
+        echo "Debug: pkg-config --libs jack"
+        pkg-config --libs jack || true # Debug output, allow failure
 
     - name: Configure CMake
       run: |
-        cmake -B ${{runner.temp}}/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$(brew --prefix)"
+        cmake -B ${{runner.temp}}/build -DCMAKE_BUILD_TYPE=Release
 
     - name: Build
       run: cmake --build ${{runner.temp}}/build --config Release -- -j$(nproc)
