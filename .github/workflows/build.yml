@@ -106,6 +106,6 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          jack-linkaudio-Linux-x64/jack-linkaudio # Corrected from Ubuntu to Linux
+          jack-linkaudio-Linux-x64/jack-linkaudio
           jack-linkaudio-macOS-x64/jack-linkaudio
           jack-linkaudio-macOS-arm64/jack-linkaudio
