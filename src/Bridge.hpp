@@ -23,6 +23,8 @@ public:
     void stop();
 
     bool isRunning() const { return mRunning; }
+    
+    void processPortChanges();
 
 private:
     // Handler for a single Link Audio Source (Link -> JACK Output)
@@ -76,7 +78,7 @@ private:
     void timebaseCallback(jack_transport_state_t state, jack_nframes_t nframes, jack_position_t* pos, int new_pos);
 
     void onChannelsChanged();
-
+    
     std::string mName;
     jack_client_t* mJackClient = nullptr;
     LinkAudio mLink;
@@ -85,15 +87,18 @@ private:
     std::vector<std::unique_ptr<SinkHandler>> mSinks;
     std::map<ChannelId, std::unique_ptr<SourceHandler>> mSources;
     std::mutex mSourcesMutex;
+
+    std::vector<ableton::LinkAudio::Channel> mKnownChannels;
+    std::mutex mChannelsMutex;
     
     double mSampleRate = 44100.0;
     double mSampleTime = 0.0;
     bool mSyncEnabled;
-    std::atomic<bool> mRunning{false};
     
     // Latencies in microseconds
     std::atomic<int64_t> mGlobalInputLatency{0};
     std::atomic<int64_t> mGlobalOutputLatency{0};
+    std::atomic<bool> mRunning{false};
 };
 
 } // namespace linkaudio

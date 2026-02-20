@@ -365,22 +365,20 @@ void Bridge::timebaseCallback(jack_transport_state_t state, jack_nframes_t nfram
 }
 
 void Bridge::onChannelsChanged() {
-    auto channels = mLink.channels();
-    std::lock_guard<std::mutex> lock(mSourcesMutex);
+    std::lock_guard<std::mutex> lock(mChannelsMutex);
+    mKnownChannels = mLink.channels();
+}
 
-    // Add new sources
-    for (const auto& ch : channels) {
-        if (mSources.find(ch.id) == mSources.end()) {
-            try {
-                mSources[ch.id] = std::make_unique<SourceHandler>(mLink, ch.id, ch.name, ch.peerName, mJackClient);
-                std::cout << "Added source: " << ch.peerName << " - " << ch.name << std::endl;
-            } catch (const std::exception& e) {
-                std::cerr << "Failed to add source: " << e.what() << std::endl;
-            }
-        }
+void Bridge::processPortChanges() {
+    std::vector<ableton::LinkAudio::Channel> channels;
+    {
+        std::lock_guard<std::mutex> lock(mChannelsMutex);
+        channels = mKnownChannels;
     }
+    
+    std::lock_guard<std::mutex> sourceLock(mSourcesMutex);
 
-    // Remove old sources
+    // Unregister ports for channels that are no longer present
     for (auto it = mSources.begin(); it != mSources.end(); ) {
         bool found = false;
         for (const auto& ch : channels) {
@@ -391,9 +389,22 @@ void Bridge::onChannelsChanged() {
         }
         if (!found) {
             std::cout << "Removed source: " << it->second->peerName << " - " << it->second->name << std::endl;
+            jack_port_unregister(mJackClient, it->second->port);
             it = mSources.erase(it);
         } else {
             ++it;
+        }
+    }
+
+    // Register ports for new channels
+    for (const auto& ch : channels) {
+        if (mSources.find(ch.id) == mSources.end()) {
+            try {
+                mSources[ch.id] = std::make_unique<SourceHandler>(mLink, ch.id, ch.name, ch.peerName, mJackClient);
+                std::cout << "Added source: " << ch.peerName << " - " << ch.name << std::endl;
+            } catch (const std::exception& e) {
+                std::cerr << "Failed to add source: " << e.what() << std::endl;
+            }
         }
     }
 }
