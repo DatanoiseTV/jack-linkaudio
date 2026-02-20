@@ -22,11 +22,12 @@ target_include_directories(jack-linkaudio PRIVATE
     extern/link/include
     extern/link/examples/linkaudio
 )
+target_compile_options(jack-linkaudio PRIVATE ${JACK_CFLAGS})
 target_link_libraries(jack-linkaudio PRIVATE
     abl_link
+    ${JACK_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
 )
-target_compile_options(jack-linkaudio PRIVATE ${JACK_CFLAGS})
 target_link_options(jack-linkaudio PRIVATE ${JACK_LDFLAGS})
 
 target_compile_definitions(jack-linkaudio PRIVATE
