@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Ableton Link
-set(BUILD_TESTING OFF CACHE BOOL "Disable building tests" FORCE) # Global variable
+set(LINK_BUILD_TESTS OFF CACHE BOOL "Disable building Link unit tests" FORCE)
 add_subdirectory(extern/link)
 
 # JACK
