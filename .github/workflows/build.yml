@@ -1,0 +1,53 @@
+name: Build jack-linkaudio
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        arch: [x64] # macOS-latest is x64 by default, macos-14 is arm64
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Set up dependencies (Ubuntu)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libjack-jackd2-dev
+
+    - name: Set up dependencies (macOS x64)
+      if: runner.os == 'macOS' && runner.arch == 'X64'
+      run: |
+        brew update
+        brew install jack
+
+    - name: Configure CMake
+      run: |
+        cmake -B ${{runner.temp}}/build -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build
+      run: cmake --build ${{runner.temp}}/build --config Release -- -j$(nproc)
+
+    - name: Upload artifact (Linux)
+      if: runner.os == 'Linux'
+      uses: actions/upload-artifact@v4
+      with:
+        name: jack-linkaudio-linux-x64
+        path: ${{runner.temp}}/build/jack-linkaudio
+
+    - name: Upload artifact (macOS)
+      if: runner.os == 'macOS'
+      uses: actions/upload-artifact@v4
+      with:
+        name: jack-linkaudio-macos-${{ runner.arch }}
+        path: ${{runner.temp}}/build/jack-linkaudio
