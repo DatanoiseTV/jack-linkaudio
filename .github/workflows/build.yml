@@ -92,6 +92,8 @@ jobs:
     needs: build # This job depends on the 'build' job completing successfully
     if: startsWith(github.ref, 'refs/tags/v') # Only run if the workflow was triggered by a tag
     runs-on: ubuntu-latest # Or any other suitable runner
+    permissions:
+      contents: write # Grant write permission for creating releases
 
     steps:
     - name: Download all build artifacts
@@ -104,6 +106,6 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          jack-linkaudio-Ubuntu-x64/jack-linkaudio
+          jack-linkaudio-Linux-x64/jack-linkaudio # Corrected from Ubuntu to Linux
           jack-linkaudio-macOS-x64/jack-linkaudio
           jack-linkaudio-macOS-arm64/jack-linkaudio
