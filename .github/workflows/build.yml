@@ -103,9 +103,11 @@ jobs:
       run: ls -R
 
     - name: Create Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         files: |
           jack-linkaudio-Linux-x64/jack-linkaudio
           jack-linkaudio-macOS-x64/jack-linkaudio
           jack-linkaudio-macOS-arm64/jack-linkaudio
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
