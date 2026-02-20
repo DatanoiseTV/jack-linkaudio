@@ -31,6 +31,9 @@ T linearInterpolate(T value, T inMin, T inMax, T outMin, T outMax) {
 
 Bridge::SinkHandler::SinkHandler(LinkAudio& link, const std::string& name, jack_client_t* jack) {
     port = jack_port_register(jack, name.c_str(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
+    if (!port) {
+        throw std::runtime_error("Failed to register JACK input port: " + name);
+    }
     // LinkAudioSink(LinkAudio& link, std::string name, size_t maxNumSamples)
     sink = std::make_unique<LinkAudioSink>(link, name, 8192);
 }
@@ -69,6 +72,9 @@ Bridge::SourceHandler::SourceHandler(LinkAudio& link, ChannelId id, const std::s
     std::replace(portName.begin(), portName.end(), ':', '_');
     
     port = jack_port_register(jack, portName.c_str(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
+    if (!port) {
+        throw std::runtime_error("Failed to register JACK output port: " + portName);
+    }
     
     auto queue = Queue(4096, {});
     queueWriter = std::make_unique<typename Queue::Writer>(std::move(queue.writer()));
