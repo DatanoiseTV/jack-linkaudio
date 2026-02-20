@@ -99,13 +99,19 @@ jobs:
     - name: Download all build artifacts
       uses: actions/download-artifact@v4
 
-    - name: Display downloaded artifacts
-      run: ls -R
+    - name: Prepare artifacts for release
+      run: |
+        mv jack-linkaudio-Linux-x64/jack-linkaudio jack-linkaudio-Linux-x64
+        mv jack-linkaudio-macOS-x64/jack-linkaudio jack-linkaudio-macOS-x64
+        mv jack-linkaudio-macOS-arm64/jack-linkaudio jack-linkaudio-macOS-arm64
+        ls -R # To verify renaming
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
         files: |
-          jack-linkaudio-*/jack-linkaudio
-      env: # Correct indentation
+          jack-linkaudio-Linux-x64
+          jack-linkaudio-macOS-x64
+          jack-linkaudio-macOS-arm64
+      env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
