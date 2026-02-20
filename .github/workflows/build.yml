@@ -19,6 +19,10 @@ jobs:
       with:
         submodules: true
 
+    - name: Debug submodule content
+      run: |
+        ls -R extern/link/modules/
+
     - name: Set up dependencies (Ubuntu)
       if: runner.os == 'Linux'
       run: |
