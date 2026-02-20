@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Ableton Link
 set(LINK_BUILD_JACK ON CACHE BOOL "Build Link examples with JACK support" FORCE)
+set(LINK_BUILD_TESTS OFF CACHE BOOL "Disable building Link tests" FORCE)
 add_subdirectory(extern/link)
 
 # JACK
