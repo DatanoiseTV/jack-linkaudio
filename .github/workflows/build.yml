@@ -25,11 +25,12 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y libjack-jackd2-dev
 
-    - name: Set up dependencies (macOS x64)
-      if: runner.os == 'macOS' && runner.arch == 'X64'
+    - name: Set up dependencies (macOS)
+      if: runner.os == 'macOS'
       run: |
         brew update
         brew install jack
+        echo "PKG_CONFIG_PATH=$(brew --prefix)/lib/pkgconfig" >> $GITHUB_ENV
 
     - name: Configure CMake
       run: |
