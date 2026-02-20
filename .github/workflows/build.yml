@@ -109,5 +109,5 @@ jobs:
           jack-linkaudio-Linux-x64/jack-linkaudio
           jack-linkaudio-macOS-x64/jack-linkaudio
           jack-linkaudio-macOS-arm64/jack-linkaudio
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      env: # Correct indentation
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
