@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Ableton Link
+set(LINK_BUILD_JACK ON CACHE BOOL "Build Link examples with JACK support" FORCE)
 add_subdirectory(extern/link)
 
 # JACK
