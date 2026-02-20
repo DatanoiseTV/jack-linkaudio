@@ -17,7 +17,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        submodules: true
+        submodules: false # Changed to false or omit for manual control
+
+    - name: Initialize and update submodules
+      run: |
+        git submodule update --init --recursive
 
     - name: Debug submodule content
       run: |
